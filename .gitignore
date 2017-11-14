@@ -1,0 +1,19 @@
+mocks/**
+# Logs
+*.log
+
+package-lock.json
+
+# Dependency directory
+node_modules
+
+# Trash
+.DS_Store
+.idea
+# .fury
+
+# Dynamically processed files
+reports
+coverage
+build
+i18n
