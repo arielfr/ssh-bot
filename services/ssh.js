@@ -23,7 +23,10 @@ ssh.prototype.createAndConnect = function (recipientId, host, user) {
   }).then(() => {
     return true;
   }).catch(err => {
-    Promise.reject(`There was an error connecting to your SSH Server: ${err}`);
+    // If an error ocurr, delete the connection
+    delete this.connections[recipientId];
+
+    return Promise.reject(`There was an error connecting to your SSH Server: ${err}`);
   });
 };
 
@@ -43,7 +46,7 @@ ssh.prototype.executeCommand = function (recipientId, command) {
 
     return result.stdout;
   }).catch(err => {
-    Promise.reject(`There was an error executing ${command}: ${err}`);
+    return Promise.reject(`There was an error executing ${command}: ${err}`);
   });
 };
 
@@ -59,12 +62,13 @@ ssh.prototype.disconnect = function (recipientId) {
   }).then((result) => {
     // Delete the connection
     delete this.connections[recipientId];
+
     return true;
   }).catch(err => {
     // Delete the connection
     delete this.connections[recipientId];
 
-    Promise.reject(`There was an error disconnecting the SSH: ${err}`);
+    return Promise.reject(`There was an error disconnecting the SSH: ${err}`);
   });
 };
 
