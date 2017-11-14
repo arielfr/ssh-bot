@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/arielfr/ssh-bot#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
+    "config": "^1.28.1",
     "express": "^4.16.2",
     "node-ssh": "^5.0.0",
     "winston-this": "^1.0.3"
