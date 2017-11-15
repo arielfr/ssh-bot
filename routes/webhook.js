@@ -76,15 +76,15 @@ router.post('/webhook', (req, res) => {
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
               ssh.reconnect(senderId).then((savedConnection) => {
-                facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${args.username}`);
+                facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${savedConnection.username}`);
               }).catch((err) => {
-                facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${args.host}: ${err}`);
+                facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${savedConnection.host}: ${err}`);
               });
             }
 
             // CMD Command
             if (command === 'cmd') {
-              const terminalCommand = splitText.slice(1).join('');
+              const terminalCommand = splitText.slice(1).join(' ');
 
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
