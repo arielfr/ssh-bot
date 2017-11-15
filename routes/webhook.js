@@ -73,8 +73,12 @@ router.post('/webhook', (req, res) => {
                   subtitle: 'ssh --host=<VALUE> --user=<VALUE> --password=<VALUE>',
                 },
                 {
-                  title: 'cmd',
+                  title: 'cmd (response as text)',
                   subtitle: 'cmd <COMMAND>. Example: cmd ls -la',
+                },
+                {
+                  title: 'cmd (response as image)',
+                  subtitle: 'cmd <COMMAND> --image. Example: cmd ls -la --image',
                 },
                 {
                   title: 'reconnect',
@@ -128,29 +132,49 @@ router.post('/webhook', (req, res) => {
               }
 
               ssh.executeCommand(senderId, terminalCommand).then((result) => {
-                // This will send the response in image format
-                if (args.image) {
-                  files.createDir(tempDirectory).then(() => {
-                    files.writeFile(path.join(tempDirectory, `${senderId}.png`), text2png(result, {
-                      textColor: 'white',
-                      bgColor: 'black',
-                      font: config.get('font')
-                    }));
+                if (result.length === 0) {
+                  logger.debug(`Response from command ${terminalCommand} was EMPTY`);
 
-                    facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`), facebook.valid_attachment_types.IMAGE_FILE).then((attachmentId) => {
-                      facebook.sendAttachment(senderId, attachmentId, facebook.valid_attachment_types.IMAGE_FILE);
-                    });
-                  });
+                  facebook.sendMessage(senderId, `Sorry, but the command (${terminalCommand}) don't produce any output...`);
                 } else {
-                  let commandResult = result;
+                  // This will send the response in image format
+                  if (args.image) {
+                    logger.debug(`The user specifies of ${terminalCommand} the result as image`);
 
-                  if (result.length === 0) {
-                    commandResult = `Sorry, but the command (${terminalCommand}) don't produce any output...`;
-                  } else if (result.length > 640) {
-                    commandResult = result.substring(0, 640);
+                    files.createDir(tempDirectory).then(() => {
+                      logger.debug(`Creating result from ${terminalCommand} to image`);
+
+                      files.writeFile(path.join(tempDirectory, `${senderId}.png`), text2png(result, {
+                        textColor: 'white',
+                        bgColor: 'black',
+                        font: config.get('font')
+                      }));
+
+                      logger.debug(`Uploading result from ${terminalCommand} to image`);
+
+                      facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`), facebook.valid_attachment_types.IMAGE_FILE).then((attachmentId) => {
+                        facebook.sendAttachment(senderId, attachmentId, facebook.valid_attachment_types.IMAGE_FILE);
+                      }).catch(() => {
+                        facebook.sendMessage(senderId, `Oops and error ocurr trying to execute: ${terminalCommand}`);
+                      });
+                    });
+                  } else {
+                    let commandResult = result;
+
+                    if (result.length > 640) {
+                      for (let i = 0; i < result.length; i++) {
+                        if ((i % 640) === 0) {
+                          commandResult = result.substring(i - 640, i);
+
+                          facebook.sendMessage(senderId, result.substring(i, 640));
+                        } else if (i === (result.length - 1)) {
+                          facebook.sendMessage(senderId, result.substring(i, result.length));
+                        }
+                      }
+                    }
+
+                    // facebook.sendMessage(senderId, commandResult);
                   }
-
-                  facebook.sendMessage(senderId, commandResult);
                 }
               }).catch((err) => {
                 facebook.sendMessage(senderId, `${err}`);
