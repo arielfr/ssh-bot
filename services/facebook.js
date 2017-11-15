@@ -18,6 +18,7 @@ module.exports = {
       },
       message: message,
     }, (res) => {
+      console.log(JSON.stringify(res))
       if (!res || res.error) {
         logger.error(`An error ocurr on sendMessage: ${res.error}`);
       }
