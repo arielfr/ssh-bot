@@ -88,7 +88,7 @@ router.post('/webhook', (req, res) => {
                   title: 'help',
                   subtitle: 'Get the available comments',
                 }
-              ], false);
+              ]);
             }
 
             // SSH Command

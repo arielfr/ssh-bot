@@ -68,7 +68,7 @@ module.exports = {
    * @param elements
    * @param isCompact
    */
-  sendList: (senderId, elements, isCompact = true) => {
+  sendList: (senderId, elements) => {
     if (isProduction) {
       fb.api('/me/messages', 'POST', {
         recipient: {
@@ -79,7 +79,6 @@ module.exports = {
             type: 'template',
             payload: {
               template_type: 'generic',
-              top_element_style: isCompact ? 'compact' : 'large',
               elements: elements,
             }
           }
