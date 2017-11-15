@@ -1,7 +1,7 @@
 const config = require('config');
 const logger = require('winston-this')('facebook');
 const fb = require('fb');
-const isProduction = (process.NODE_ENV === 'production');
+const isProduction = (process.env.NODE_ENV === 'production');
 
 fb.setAccessToken(config.get('token'));
 fb.options({version: 'v2.6'});
