@@ -160,10 +160,12 @@ router.post('/webhook', (req, res) => {
                     });
                   } else {
                     if (result.length > 640) {
+                      let j = 0;
                       for (let i = 0; i < result.length; i++) {
-                        if ((i % 640) === 0) {
-                          facebook.sendMessage(senderId, result.substring(i - 640, 640));
-                        } else if (i === (result.length - 1)) {
+                        if (i !== 0 && (i % 640) === 0) {
+                          facebook.sendMessage(senderId, result.substring(i - 640, j + 640));
+                          j = j + 640;
+                        } else if ((i === (result.length - 1))) {
                           facebook.sendMessage(senderId, result.substring(i - 640, result.length));
                         }
                       }
