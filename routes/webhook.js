@@ -65,8 +65,8 @@ router.post('/webhook', (req, res) => {
             // facebook.sendMessage(recipientId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
           }
 
-          if (command === 'ssh' && args.host && args.user) {
-            ssh.createAndConnect(recipientId, args.host, args.user).then(() => {
+          if (command === 'ssh' && args.host && args.user && args.pem) {
+            ssh.createAndConnect(recipientId, args.host, args.user, args.pem).then(() => {
               console.log('Connection Stablished');
             }).catch((err) => {
               console.log(err);

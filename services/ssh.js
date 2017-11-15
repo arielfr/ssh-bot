@@ -1,11 +1,12 @@
 const logger = require('winston-this')('ssh');
 const nodeSSH = require('node-ssh');
+const files = require('../utils/files');
 
 const ssh = function () {
   this.connections = {};
 };
 
-ssh.prototype.createAndConnect = function (recipientId, host, user) {
+ssh.prototype.createAndConnect = function (recipientId, host, user, pem) {
   if (!!this.connections[recipientId]) {
     return Promise.reject('You already have a open session. Please send "disconnect" first');
   }
@@ -18,7 +19,7 @@ ssh.prototype.createAndConnect = function (recipientId, host, user) {
     return this.connections[recipientId].connect({
       host: host,
       user: user,
-      privateKey: '/Users/arey/.ssh/patas.pem',
+      privateKey: files.read(`./${recipientId}.pem`),
     });
   }).then(() => {
     return true;
