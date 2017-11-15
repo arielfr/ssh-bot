@@ -3,6 +3,7 @@ mocks/**
 *.log
 
 pem/
+temp/
 
 package-lock.json
 
