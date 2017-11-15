@@ -40,7 +40,7 @@ router.post('/webhook', (req, res) => {
 
   // Checks this is an event from a page subscription
   if (body.object === 'page') {
-    logger.info('Message receive from page');
+    logger.info(`Message receive from page`);
 
     // Iterates over each entry - there may be multiple if batched
     body.entry.forEach(function(entry) {
@@ -49,53 +49,59 @@ router.post('/webhook', (req, res) => {
       const webhook_event = entry.messaging[0];
       const recipientId = webhook_event.recipient.id;
 
+      // Check if it is a message
       if (webhook_event.message) {
-        const text = webhook_event.message.text || '';
-        const splitText = text.split(' ');
-        const command = splitText[0].toLowerCase();
-        const args = getArgs(splitText.slice(1));
+        // If it is a text message
+        if (webhook_event.message.text) {
+          const text = webhook_event.message.text || '';
+          const splitText = text.split(' ');
+          const command = splitText[0].toLowerCase();
+          const args = getArgs(splitText.slice(1));
 
-        logger.info(`Command: ${command} | Arguments: ${JSON.stringify(args)}`);
+          logger.info(`Command: ${command} | Arguments: ${JSON.stringify(args)}`);
 
-        if (command !== 'ssh') {
-          // facebook.sendMessage(recipientId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
-        }
+          if (command !== 'ssh') {
+            // facebook.sendMessage(recipientId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
+          }
 
-        if (command === 'ssh' && args.host && args.user) {
-          ssh.createAndConnect(recipientId, args.host, args.user).then(() => {
-            console.log('Connection Stablished');
-          }).catch((err) => {
-            console.log(err);
-          });
-        }
-
-        if (command === 'cmd') {
-          const isValid = validCommands.indexOf(args._[0]) !== -1;
-
-          if (isValid) {
-            const internalCommand = commandTranslations[args._[0]];
-
-            ssh.executeCommand(recipientId, internalCommand).then((result) => {
-              console.log(result);
+          if (command === 'ssh' && args.host && args.user) {
+            ssh.createAndConnect(recipientId, args.host, args.user).then(() => {
+              console.log('Connection Stablished');
             }).catch((err) => {
               console.log(err);
             });
-          } else {
-            console.log('The command is invalid or not supported. Send "help" to know all commands');
           }
-        }
 
-        if (command === 'disconnect') {
-          ssh.disconnect(recipientId).then(() => {
-            console.log('You are now disconnected');
-          }).catch((err) => {
-            console.log(err);
-          });
-        }
+          if (command === 'cmd') {
+            const isValid = validCommands.indexOf(args._[0]) !== -1;
 
-        // handleMessage(sender_psid, webhook_event.message);
+            if (isValid) {
+              const internalCommand = commandTranslations[args._[0]];
+
+              ssh.executeCommand(recipientId, internalCommand).then((result) => {
+                console.log(result);
+              }).catch((err) => {
+                console.log(err);
+              });
+            } else {
+              console.log('The command is invalid or not supported. Send "help" to know all commands');
+            }
+          }
+
+          if (command === 'disconnect') {
+            ssh.disconnect(recipientId).then(() => {
+              console.log('You are now disconnected');
+            }).catch((err) => {
+              console.log(err);
+            });
+          }
+        } else if (webhook_event.message.attachments) {
+          console.log(webhook_event.message.attachments[0].payload.url);
+        } else {
+          logger.error(`Unknown type of message: ${Object.keys(webhook_event.message)}`);
+        }
       } else if (webhook_event.postback) {
-        // handlePostback(sender_psid, webhook_event.postback);
+        logger.info(`postback received`);
       }
     });
 
