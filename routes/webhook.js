@@ -57,7 +57,20 @@ router.post('/webhook', (req, res) => {
 
           logger.info(`Command: ${command} | Arguments: ${JSON.stringify(args)}`);
 
-          if (['ssh', 'cmd', 'reconnect', 'disconnect'].indexOf(command) !== -1) {
+          if (['ssh', 'cmd', 'reconnect', 'disconnect', 'help'].indexOf(command) !== -1) {
+            if (command === 'help') {
+              facebook.sendList(senderId, [
+                {
+                  title: 'ssh',
+                  subtitle: 'ssh command needs to receive --host --user and --pem or --pasword depending on your security',
+                },
+                {
+                  title: 'cmd',
+                  subtitle: 'cmd <COMMAND>. Example: cmd ls -la',
+                }
+              ]);
+            }
+
             // SSH Command
             if (command === 'ssh' && args.host && args.user && (args.pem || args.password)) {
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
@@ -96,12 +109,12 @@ router.post('/webhook', (req, res) => {
 
                   commandResult = result.substring(0, 640);
                 } else if (result.length === 0) {
-                  commandResult = `Sorry, but the command doesn't produce any ouput to show you`;
+                  commandResult = `Sorry, but the command don't produce any output...`;
                 }
 
                 facebook.sendMessage(senderId, commandResult);
               }).catch((err) => {
-                facebook.sendMessage(senderId, `Oops and error ocurr executing command: ${err}`);
+                facebook.sendMessage(senderId, `${err}`);
               });
             }
 

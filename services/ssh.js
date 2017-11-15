@@ -151,7 +151,7 @@ ssh.prototype.executeCommand = function (senderId, command) {
     return this.connections[senderId].execCommand(command);
   }).then((result) => {
     if (result.stderr) {
-      return result.stderr;
+      return Promise.reject(`There was an error executing ${command}: ${result.stderr}`);
     }
 
     return result.stdout;
