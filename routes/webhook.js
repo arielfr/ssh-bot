@@ -118,13 +118,13 @@ router.post('/webhook', (req, res) => {
             // CMD Command
             if (command === 'cmd') {
               // Get the command that is going to be send to the bash
-              const terminalCommand = splitText.slice(1).join(' ');
+              let terminalCommand = splitText.slice(1).join(' ');
 
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
               // Remove the argument from the final terminal command
               if (args.image) {
-                terminalCommand.replace('--image', '');
+                terminalCommand = terminalCommand.replace('--image', '');
               }
 
               ssh.executeCommand(senderId, terminalCommand).then((result) => {
