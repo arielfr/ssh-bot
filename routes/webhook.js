@@ -159,21 +159,15 @@ router.post('/webhook', (req, res) => {
                       });
                     });
                   } else {
-                    let commandResult = result;
-
                     if (result.length > 640) {
                       for (let i = 0; i < result.length; i++) {
                         if ((i % 640) === 0) {
-                          commandResult = result.substring(i - 640, i);
-
-                          facebook.sendMessage(senderId, result.substring(i, 640));
+                          facebook.sendMessage(senderId, result.substring(i - 640, 640));
                         } else if (i === (result.length - 1)) {
-                          facebook.sendMessage(senderId, result.substring(i, result.length));
+                          facebook.sendMessage(senderId, result.substring(i - 640, result.length));
                         }
                       }
                     }
-
-                    // facebook.sendMessage(senderId, commandResult);
                   }
                 }
               }).catch((err) => {
