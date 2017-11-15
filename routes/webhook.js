@@ -143,7 +143,7 @@ router.post('/webhook', (req, res) => {
               ssh.disconnect(senderId).then(() => {
                 facebook.sendMessage(senderId, `You are now disconnected. Hope to see you again.`);
               }).catch((err) => {
-                console.log(err);
+                facebook.sendMessage(senderId, err);
               });
             }
           } else {
