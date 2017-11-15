@@ -68,7 +68,40 @@ module.exports = {
    * @param elements
    * @param isCompact
    */
-  sendList: (senderId, elements) => {
+  sendList: (senderId, elements, isCompact = true) => {
+    if (isProduction) {
+      fb.api('/me/messages', 'POST', {
+        recipient: {
+          id: senderId
+        },
+        message: {
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'list',
+              top_element_style: isCompact ? 'compact' : 'large',
+              elements: elements,
+            }
+          }
+        },
+      }, (res) => {
+        if (!res || res.error) {
+          logger.error(`An error ocurr on sendAction: ${res.error.message}`);
+          return;
+        }
+
+        logger.info(`Reaction sent to user: ${senderId}`);
+      });
+    } else {
+      logger.info(items);
+    }
+  },
+  /**
+   * Send generic template
+   * @param senderId
+   * @param elements
+   */
+  sendGeneric: (senderId, elements) => {
     if (isProduction) {
       fb.api('/me/messages', 'POST', {
         recipient: {
