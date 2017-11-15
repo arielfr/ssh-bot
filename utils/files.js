@@ -15,7 +15,7 @@ module.exports = {
   read: (location) => {
     return Promise.resolve().then(() => {
       try {
-        return fs.readFileSync(location);
+        return fs.readFileSync(location, 'utf8');
       } catch(err) {
         return Promise.reject(`An error ocurr reading file: ${err}`);
       }
