@@ -73,12 +73,12 @@ router.post('/webhook', (req, res) => {
             }).catch((err) => {
               facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
             });
-          } else {
+          } else if (command === 'ssh') {
             facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
           }
 
           if (command === 'reconnect') {
-            ssh.createAndConnect(senderId).then((savedConnection) => {
+            ssh.reconnect(senderId).then((savedConnection) => {
               facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${args.username}`);
             }).catch((err) => {
               facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
@@ -122,6 +122,8 @@ router.post('/webhook', (req, res) => {
 
           // Create Pem Directory if it doesnt exists
           files.createDir(pemDirectory).then(() => {
+            facebook.sendMessage(senderId, 'Processing File. Please Wait...');
+
             return files.downloadFile(payloadUrl, savedFile)
           }).then(() => {
             facebook.sendMessage(senderId, 'Pem file was successfully downloaded and saved. When you try to connect dont forget to send --pem argument');
