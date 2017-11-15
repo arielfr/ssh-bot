@@ -67,11 +67,21 @@ router.post('/webhook', (req, res) => {
             // facebook.sendMessage(senderId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
           }
 
-          if (command === 'ssh' && args.host && args.user && args.pem) {
-            ssh.createAndConnect(senderId, args.host, args.user, args.pem).then(() => {
-              facebook.sendMessage(senderId, `You are now connected to ${args.host}`);
+          if (command === 'ssh' && args.host && args.user && (args.pem || args.password)) {
+            ssh.createAndConnect(senderId, args.host, args.user, args.password, args.pem).then(() => {
+              facebook.sendMessage(senderId, `You are now connected to ${args.host}@${args.user}`);
             }).catch((err) => {
-              console.log(err);
+              facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
+            });
+          } else {
+            facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
+          }
+
+          if (command === 'reconnect') {
+            ssh.createAndConnect(senderId).then((savedConnection) => {
+              facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${args.username}`);
+            }).catch((err) => {
+              facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
             });
           }
 

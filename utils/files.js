@@ -33,5 +33,10 @@ module.exports = {
         return Promise.reject(`An error ocurr creating directory: ${err}`);
       }
     });
+  },
+  fileExists: (filePath) => {
+    return Promise.resolve().then(() => {
+      return fs.existsSync(filePath);
+    });
   }
 };
