@@ -11,7 +11,7 @@ const path = require('path');
 const pemDirectory = path.join(__dirname, '../', 'pems');
 const validCommands = ['ls', 'cat', 'cd'];
 const commandTranslations = {
-  ls: 'ls -la',
+  ls: 'ls',
   cat: 'cat',
   cd: 'cd',
 };
@@ -69,7 +69,7 @@ router.post('/webhook', (req, res) => {
 
           if (command === 'ssh' && args.host && args.user && args.pem) {
             ssh.createAndConnect(senderId, args.host, args.user, args.pem).then(() => {
-              console.log('Connection Stablished');
+              facebook.sendMessage(senderId, `You are now connected to ${args.host}`);
             }).catch((err) => {
               console.log(err);
             });
