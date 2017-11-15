@@ -9,19 +9,19 @@ const ssh = function () {
   this.connections = {};
 };
 
-ssh.prototype.createAndConnect = function (recipientId, host, user, pem) {
-  if (!!this.connections[recipientId]) {
+ssh.prototype.createAndConnect = function (senderId, host, user, pem) {
+  if (!!this.connections[senderId]) {
     return Promise.reject('You already have a open session. Please send "disconnect" first');
   }
 
-  this.connections[recipientId] = new nodeSSH();
+  this.connections[senderId] = new nodeSSH();
 
   return Promise.resolve().then(() => {
-    return files.read(path.join(pemDirectory, `./${recipientId}.pem`));
+    return files.read(path.join(pemDirectory, `./${senderId}.pem`));
   }).then((pemFile) => {
     logger.info(`Creating a connection: ${user}@${host}`);
 
-    return this.connections[recipientId].connect({
+    return this.connections[senderId].connect({
       host: host,
       user: user,
       privateKey: pemFile,
@@ -30,21 +30,21 @@ ssh.prototype.createAndConnect = function (recipientId, host, user, pem) {
     return true;
   }).catch(err => {
     // If an error ocurr, delete the connection
-    delete this.connections[recipientId];
+    delete this.connections[senderId];
 
     return Promise.reject(`There was an error connecting to your SSH Server: ${err}`);
   });
 };
 
-ssh.prototype.executeCommand = function (recipientId, command) {
-  if (!this.connections[recipientId]) {
+ssh.prototype.executeCommand = function (senderId, command) {
+  if (!this.connections[senderId]) {
     return Promise.reject('You dont have a open connection. Please connect first. Send "help" command to know the available commands');
   }
 
   return Promise.resolve().then(() => {
-    logger.info(`Executing command: ${recipientId} -> ${command}`);
+    logger.info(`Executing command: ${senderId} -> ${command}`);
 
-    return this.connections[recipientId].execCommand(command);
+    return this.connections[senderId].execCommand(command);
   }).then((result) => {
     if (result.stderr) {
       return result.stderr;
@@ -56,23 +56,23 @@ ssh.prototype.executeCommand = function (recipientId, command) {
   });
 };
 
-ssh.prototype.disconnect = function (recipientId) {
-  if (!this.connections[recipientId]) {
+ssh.prototype.disconnect = function (senderId) {
+  if (!this.connections[senderId]) {
     return Promise.reject('You dont have a open connection. Please connect first. Send "help" command to know the available commands');
   }
 
   return Promise.resolve().then(() => {
-    logger.info(`Disconnecting SSH from: ${recipientId}`);
+    logger.info(`Disconnecting SSH from: ${senderId}`);
 
-    return this.connections[recipientId].dispose();
+    return this.connections[senderId].dispose();
   }).then((result) => {
     // Delete the connection
-    delete this.connections[recipientId];
+    delete this.connections[senderId];
 
     return true;
   }).catch(err => {
     // Delete the connection
-    delete this.connections[recipientId];
+    delete this.connections[senderId];
 
     return Promise.reject(`There was an error disconnecting the SSH: ${err}`);
   });

@@ -8,13 +8,13 @@ fb.options({version: 'v2.6'});
 module.exports = {
   /**
    * Send message to Facebook User
-   * @param recipientId
+   * @param senderId
    * @param message
    */
-  sendMessage: (recipientId, message) => {
+  sendMessage: (senderId, message) => {
     fb.api('/me/messages', 'POST', {
       recipient: {
-        id: recipientId
+        id: senderId
       },
       message: {
         text: message
@@ -25,7 +25,7 @@ module.exports = {
         return;
       }
 
-      logger.info(`Message sent to user: ${recipientId}`);
+      logger.info(`Message sent to user: ${senderId}`);
     });
   }
 };

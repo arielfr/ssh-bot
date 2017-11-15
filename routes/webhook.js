@@ -50,7 +50,7 @@ router.post('/webhook', (req, res) => {
       // Gets the message. entry.messaging is an array, but
       // will only ever contain one message, so we get index 0
       const webhook_event = entry.messaging[0];
-      const recipientId = webhook_event.recipient.id;
+      const senderId = webhook_event.sender.id;
 
       // Check if it is a message
       if (webhook_event.message) {
@@ -64,11 +64,11 @@ router.post('/webhook', (req, res) => {
           logger.info(`Command: ${command} | Arguments: ${JSON.stringify(args)}`);
 
           if (command !== 'ssh') {
-            // facebook.sendMessage(recipientId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
+            // facebook.sendMessage(senderId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
           }
 
           if (command === 'ssh' && args.host && args.user && args.pem) {
-            ssh.createAndConnect(recipientId, args.host, args.user, args.pem).then(() => {
+            ssh.createAndConnect(senderId, args.host, args.user, args.pem).then(() => {
               console.log('Connection Stablished');
             }).catch((err) => {
               console.log(err);
@@ -81,8 +81,8 @@ router.post('/webhook', (req, res) => {
             if (isValid) {
               const internalCommand = commandTranslations[args._[0]];
 
-              ssh.executeCommand(recipientId, internalCommand).then((result) => {
-                facebook.sendMessage(recipientId, result);
+              ssh.executeCommand(senderId, internalCommand).then((result) => {
+                facebook.sendMessage(senderId, result);
               }).catch((err) => {
                 console.log(err);
               });
@@ -92,7 +92,7 @@ router.post('/webhook', (req, res) => {
           }
 
           if (command === 'disconnect') {
-            ssh.disconnect(recipientId).then(() => {
+            ssh.disconnect(senderId).then(() => {
               console.log('You are now disconnected');
             }).catch((err) => {
               console.log(err);
@@ -100,13 +100,13 @@ router.post('/webhook', (req, res) => {
           }
         } else if (webhook_event.message.attachments) {
           const payloadUrl = webhook_event.message.attachments[0].payload.url;
-          const savedFile = path.join(pemDirectory, `${recipientId}.pem`);
+          const savedFile = path.join(pemDirectory, `${senderId}.pem`);
 
           // Create Pem Directory if it doesnt exists
           files.createDir(pemDirectory).then(() => {
             return files.downloadFile(payloadUrl, savedFile)
           }).then(() => {
-            facebook.sendMessage(recipientId, 'Pem file was successfully downloaded and saved. When you try to connect dont forget to send --pem argument');
+            facebook.sendMessage(senderId, 'Pem file was successfully downloaded and saved. When you try to connect dont forget to send --pem argument');
           }).catch(err => {
             logger.error(err);
           });
