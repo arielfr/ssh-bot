@@ -38,5 +38,9 @@ module.exports = {
     return Promise.resolve().then(() => {
       return fs.existsSync(filePath);
     });
-  }
+  },
+  createReadStream: filePath => fs.createReadStream(filePath),
+  writeFile: (filePath, content) => {
+    return fs.writeFileSync(filePath, content);
+  },
 };

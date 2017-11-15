@@ -8,7 +8,6 @@ const ssh = require('../services/ssh');
 const files = require('../utils/files');
 const path = require('path');
 const text2png = require('text2png');
-const fs = require('fs');
 
 const pemDirectory = path.join(__dirname, '../', 'pems');
 const tempDirectory = path.join(__dirname, '../', 'temp');
@@ -118,27 +117,41 @@ router.post('/webhook', (req, res) => {
 
             // CMD Command
             if (command === 'cmd') {
+              // Get the command that is going to be send to the bash
               const terminalCommand = splitText.slice(1).join(' ');
 
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
+              // Remove the argument from the final terminal command
+              if (args.image) {
+                terminalCommand.replace('--image', '');
+              }
+
               ssh.executeCommand(senderId, terminalCommand).then((result) => {
-                let commandResult = result;
+                // This will send the response in image format
+                if (args.image) {
+                  files.createDir(tempDirectory).then(() => {
+                    files.writeFile(path.join(tempDirectory, `${senderId}.png`), text2png(result, {
+                      textColor: 'white',
+                      bgColor: 'black',
+                      font: config.get('font')
+                    }));
 
-                files.createDir(tempDirectory);
+                    facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`, facebook.valid_attachment_types.IMAGE_FILE)).then((attachmentId) => {
+                      facebook.sendAttachment(senderId, attachmentId, facebook.valid_attachment_types.IMAGE_FILE);
+                    });
+                  });
+                } else {
+                  let commandResult = result;
 
-                fs.writeFileSync(path.join(tempDirectory, `${senderId}.png`), text2png(commandResult, {textColor: 'white', bgColor: 'black', font: config.get('font')}));
+                  if (result.length === 0) {
+                    commandResult = `Sorry, but the command (${terminalCommand}) don't produce any output...`;
+                  } else if (result.length > 640) {
+                    commandResult = result.substring(0, 640);
+                  }
 
-                facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`)).then((attachmentId) => {
-                  console.log(attachmentId)
-                  facebook.sendAttachment(senderId, attachmentId);
-                });
-
-                if (result.length === 0) {
-                  commandResult = `Sorry, but the command don't produce any output...`;
+                  facebook.sendMessage(senderId, commandResult);
                 }
-
-                // facebook.sendMessage(senderId, commandResult);
               }).catch((err) => {
                 facebook.sendMessage(senderId, `${err}`);
               });

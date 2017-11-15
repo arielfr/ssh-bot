@@ -2,8 +2,8 @@ const config = require('config');
 const logger = require('winston-this')('facebook');
 const fb = require('fb');
 const request = require('request');
+const files = require('../utils/files');
 const isProduction = (process.env.NODE_ENV === 'production');
-const fs = require('fs');
 
 fb.setAccessToken(config.get('token'));
 fb.options({version: 'v2.6'});
@@ -13,6 +13,12 @@ module.exports = {
     MARK_AS_READ: 'mark_seen',
     TYPING: 'typing_on',
     END_TYPING: 'typing_off',
+  },
+  valid_attachment_types: {
+    AUDIO_FILE: 'audio',
+    VIDEO_FILE: 'video',
+    IMAGE_FILE: 'image',
+    GENERIC_FILE: 'file',
   },
   /**
    * Send message to Facebook User
@@ -130,7 +136,7 @@ module.exports = {
       logger.info(items);
     }
   },
-  sendAttachment: (senderId, attachmentId, type = 'image') => {
+  sendAttachment: (senderId, attachmentId, type = this.valid_attachment_types.GENERIC_FILE) => {
     if (isProduction) {
       fb.api('/me/messages', 'POST', {
         recipient: {
@@ -156,23 +162,23 @@ module.exports = {
       logger.info(attachmentId);
     }
   },
-  uploadFile: (attachmentPath, type = 'image') => {
-    const formData = {
-      message: JSON.stringify({
-        attachment: {
-          type: type,
-          payload: {
-            is_reusable: true,
-          }
-        }
-      }),
-      filedata: fs.createReadStream(attachmentPath)
-    };
-
+  uploadFile: (attachmentPath, type = this.valid_attachment_types.GENERIC_FILE) => {
     return new Promise((resolve, reject) => {
+      const formData = {
+        message: JSON.stringify({
+          attachment: {
+            type: type,
+            payload: {
+              is_reusable: true,
+            }
+          }
+        }),
+        filedata: files.createReadStream(attachmentPath)
+      };
+
       request.post({
         url: `https://graph.facebook.com/v2.6/me/message_attachments?access_token=${config.get('token')}`,
-        formData: formData,
+        formData,
       }, (err, response, body) => {
         if (err) {
           logger.error(JSON.parse(err).message);
