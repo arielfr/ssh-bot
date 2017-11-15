@@ -38,7 +38,7 @@ module.exports = {
    * @param sendId
    * @param action
    */
-  sendAction: (sendId, action) => {
+  sendAction: (senderId, action) => {
     fb.api('/me/messages', 'POST', {
       recipient: {
         id: senderId
