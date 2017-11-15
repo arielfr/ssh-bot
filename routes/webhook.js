@@ -137,7 +137,7 @@ router.post('/webhook', (req, res) => {
                       font: config.get('font')
                     }));
 
-                    facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`, facebook.valid_attachment_types.IMAGE_FILE)).then((attachmentId) => {
+                    facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`), facebook.valid_attachment_types.IMAGE_FILE).then((attachmentId) => {
                       facebook.sendAttachment(senderId, attachmentId, facebook.valid_attachment_types.IMAGE_FILE);
                     });
                   });
