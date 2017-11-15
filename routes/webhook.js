@@ -98,9 +98,12 @@ router.post('/webhook', (req, res) => {
           }
         } else if (webhook_event.message.attachments) {
           const payloadUrl = webhook_event.message.attachments[0].payload.url;
+          const savedFile = `./${recipientId}.pem`;
 
-          files.downloadFile(payloadUrl, `./${recipientId}.pem`).then(() => {
-
+          files.downloadFile(payloadUrl, savedFile).then(() => {
+            return files.read(savedFile);
+          }).then((fileContent) => {
+            console.log(fileContent)
           }).catch(err => {
             logger.error(err);
           });
