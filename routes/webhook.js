@@ -62,13 +62,33 @@ router.post('/webhook', (req, res) => {
               facebook.sendList(senderId, [
                 {
                   title: 'ssh',
-                  subtitle: 'ssh command needs to receive --host --user and --pem or --pasword depending on your security',
+                  subtitle: `If you wan't to connect to a SSH you can do it using a PEM file or Password. If you want to use a PEM file, you first need to send the PEM as an attachment, the run the "ssh" command`,
+                },
+                {
+                  title: 'ssh (With PEM)',
+                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --pem',
+                },
+                {
+                  title: 'ssh (With Password)',
+                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --password=<VALUE>',
                 },
                 {
                   title: 'cmd',
                   subtitle: 'cmd <COMMAND>. Example: cmd ls -la',
+                },
+                {
+                  title: 'reconnect',
+                  subtitle: 'If you already connect using SSH, you can run this without any argument',
+                },
+                {
+                  title: 'disconnect',
+                  subtitle: 'Close connection to server',
+                },
+                {
+                  title: 'help',
+                  subtitle: 'Get the available comments',
                 }
-              ]);
+              ], false);
             }
 
             // SSH Command
