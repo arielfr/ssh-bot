@@ -5,6 +5,7 @@ const router = express.Router();
 const parseArgs = require('minimist');
 const facebook = require('../services/facebook');
 const ssh = require('../services/ssh');
+const files = require('../utils/files');
 
 const validCommands = ['ls', 'cat', 'cd'];
 const commandTranslations = {
@@ -96,7 +97,13 @@ router.post('/webhook', (req, res) => {
             });
           }
         } else if (webhook_event.message.attachments) {
-          console.log(webhook_event.message.attachments[0].payload.url);
+          const payloadUrl = webhook_event.message.attachments[0].payload.url;
+
+          files.downloadFile(payloadUrl, `./${recipientId}.pem`).then(() => {
+
+          }).catch(err => {
+            logger.error(err);
+          });
         } else {
           logger.error(`Unknown type of message: ${Object.keys(webhook_event.message)}`);
         }
