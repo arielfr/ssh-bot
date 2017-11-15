@@ -9,12 +9,6 @@ const files = require('../utils/files');
 const path = require('path');
 
 const pemDirectory = path.join(__dirname, '../', 'pems');
-const validCommands = ['ls', 'cat', 'cd'];
-const commandTranslations = {
-  ls: 'ls -la',
-  cat: 'cat',
-  cd: 'cd',
-};
 
 router.get('/webhook', (req, res) => {
   // Your verify token. Should be a random string.
@@ -43,7 +37,7 @@ router.post('/webhook', (req, res) => {
 
   // Checks this is an event from a page subscription
   if (body.object === 'page') {
-    logger.info(`Message receive from page`);
+    logger.debug(`Message receive from page`);
 
     // Iterates over each entry - there may be multiple if batched
     body.entry.forEach(function(entry) {
@@ -63,58 +57,66 @@ router.post('/webhook', (req, res) => {
 
           logger.info(`Command: ${command} | Arguments: ${JSON.stringify(args)}`);
 
-          if (command !== 'ssh') {
-            // facebook.sendMessage(senderId, 'El comando ingresado es invalido. Para conocer los comandos disponibles ingrese "help"');
-          }
+          if (['ssh', 'cmd', 'reconnect', 'disconnect'].indexOf(command) !== -1) {
+            // SSH Command
+            if (command === 'ssh' && args.host && args.user && (args.pem || args.password)) {
+              facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
-          if (command === 'ssh' && args.host && args.user && (args.pem || args.password)) {
-            ssh.createAndConnect(senderId, args.host, args.user, args.password, args.pem).then(() => {
-              facebook.sendMessage(senderId, `You are now connected to ${args.host}@${args.user}`);
-            }).catch((err) => {
-              facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
-            });
-          } else if (command === 'ssh') {
-            facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
-          }
+              ssh.createAndConnect(senderId, args.host, args.user, args.password, args.pem).then(() => {
+                facebook.sendMessage(senderId, `You are now connected to ${args.host}@${args.user}`);
+              }).catch((err) => {
+                facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${args.host}: ${err}`);
+              });
+            } else if (command === 'ssh') {
+              facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
+            }
 
-          if (command === 'reconnect') {
-            ssh.reconnect(senderId).then((savedConnection) => {
-              facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${args.username}`);
-            }).catch((err) => {
-              facebook.sendMessage(senderId, `Oops and error ocurred connecting to ${args.host}: ${err}`);
-            });
-          }
+            // Reconnect command
+            if (command === 'reconnect') {
+              facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
-          if (command === 'cmd') {
-            const isValid = validCommands.indexOf(args._[0]) !== -1;
+              ssh.reconnect(senderId).then((savedConnection) => {
+                facebook.sendMessage(senderId, `You are now connected to ${savedConnection.host}@${args.username}`);
+              }).catch((err) => {
+                facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${args.host}: ${err}`);
+              });
+            }
 
-            if (isValid) {
-              const internalCommand = commandTranslations[args._[0]];
+            // CMD Command
+            if (command === 'cmd') {
+              const terminalCommand = splitText.slice(1).join('');
 
-              ssh.executeCommand(senderId, internalCommand).then((result) => {
+              facebook.sendAction(senderId, facebook.available_actions.TYPING);
+
+              ssh.executeCommand(senderId, terminalCommand).then((result) => {
                 let commandResult = result;
 
                 if (result.length >= 640) {
                   facebook.sendMessage(senderId, `The result was more than 640 characters. We are stripping the message.`);
 
                   commandResult = result.substring(0, 640);
+                } else if (result.length === 0) {
+                  commandResult = `Sorry, but the command doesn't produce any ouput to show you`;
                 }
 
                 facebook.sendMessage(senderId, commandResult);
               }).catch((err) => {
+                facebook.sendMessage(senderId, `Oops and error ocurr executing command: ${err}`);
+              });
+            }
+
+            // Disconnect Comand
+            if (command === 'disconnect') {
+              facebook.sendAction(senderId, facebook.available_actions.TYPING);
+
+              ssh.disconnect(senderId).then(() => {
+                facebook.sendMessage(senderId, `You are now disconnected. Hope to see you again.`);
+              }).catch((err) => {
                 console.log(err);
               });
-            } else {
-              console.log('The command is invalid or not supported. Send "help" to know all commands');
             }
-          }
-
-          if (command === 'disconnect') {
-            ssh.disconnect(senderId).then(() => {
-              facebook.sendMessage(senderId, `You are now disconnected. Hope to see you again.`);
-            }).catch((err) => {
-              console.log(err);
-            });
+          } else {
+            facebook.sendMessage(senderId, `Invalid command. Please type "help" to know all of the available commands`);
           }
         } else if (webhook_event.message.attachments) {
           const payloadUrl = webhook_event.message.attachments[0].payload.url;
@@ -122,7 +124,7 @@ router.post('/webhook', (req, res) => {
 
           // Create Pem Directory if it doesnt exists
           files.createDir(pemDirectory).then(() => {
-            facebook.sendMessage(senderId, 'Processing File. Please Wait...');
+            facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
             return files.downloadFile(payloadUrl, savedFile)
           }).then(() => {
