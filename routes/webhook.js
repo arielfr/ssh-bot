@@ -78,6 +78,9 @@ router.post('/webhook', (req, res) => {
                   title: 'reconnect',
                   subtitle: 'If you already connect using SSH, you can run this without any argument',
                 },
+              ]);
+
+              facebook.sendList(senderId, [
                 {
                   title: 'disconnect',
                   subtitle: 'Close connection to server',
