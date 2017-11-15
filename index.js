@@ -3,6 +3,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('winston-this')('index');
 const port = process.env.PORT || config.get('port');
+const environment = process.NODE_ENV;
+
+logger.info(`NODE_ENV: ${environment}`);
 
 // Express Application initialization
 const app = express();
