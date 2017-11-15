@@ -106,9 +106,7 @@ router.post('/webhook', (req, res) => {
           files.createDir(pemDirectory).then(() => {
             return files.downloadFile(payloadUrl, savedFile)
           }).then(() => {
-            return files.read(savedFile);
-          }).then((fileContent) => {
-            console.log(fileContent);
+            facebook.sendMessage(recipientId, 'Pem file was successfully downloaded and saved. When you try to connect dont forget to send --pem argument');
           }).catch(err => {
             logger.error(err);
           });

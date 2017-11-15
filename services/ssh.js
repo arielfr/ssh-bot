@@ -17,12 +17,14 @@ ssh.prototype.createAndConnect = function (recipientId, host, user, pem) {
   this.connections[recipientId] = new nodeSSH();
 
   return Promise.resolve().then(() => {
+    return files.read(path.join(pemDirectory, `./${recipientId}.pem`));
+  }).then((pemFile) => {
     logger.info(`Creating a connection: ${user}@${host}`);
 
     return this.connections[recipientId].connect({
       host: host,
       user: user,
-      privateKey: files.read(path.join(pemDirectory, `./${recipientId}.pem`)),
+      privateKey: pemFile,
     });
   }).then(() => {
     return true;
