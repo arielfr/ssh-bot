@@ -22,6 +22,7 @@ module.exports = {
     }, (res) => {
       if (!res || res.error) {
         logger.error(`An error ocurr on sendMessage: ${res.error.message}`);
+        return;
       }
 
       logger.info(`Message sent to user: ${recipientId}`);
