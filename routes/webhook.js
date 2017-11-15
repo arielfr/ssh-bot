@@ -61,7 +61,7 @@ router.post('/webhook', (req, res) => {
             if (command === 'help') {
               facebook.sendMessage(senderId, `Welcome to SSH!\n\nThis BOT will allow you to establish a SSH connection. We are currently supporting a PEM file and a password connection.\n\nIf you want to use a PEM file, you only need to send us the file as an attachment first. Then, use the ssh command "--pem" flag to indicate that you wanna use it\n\nAvailable Commands:`);
 
-              facebook.sendList(senderId, [
+              facebook.sendGeneric(senderId, [
                 {
                   title: 'ssh (With PEM)',
                   subtitle: 'ssh --host=<VALUE> --user=<VALUE> --pem',
@@ -78,9 +78,6 @@ router.post('/webhook', (req, res) => {
                   title: 'reconnect',
                   subtitle: 'If you already connect using SSH, you can run this without any argument',
                 },
-              ]);
-
-              facebook.sendList(senderId, [
                 {
                   title: 'disconnect',
                   subtitle: 'Close connection to server',
