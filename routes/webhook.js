@@ -6,7 +6,9 @@ const parseArgs = require('minimist');
 const facebook = require('../services/facebook');
 const ssh = require('../services/ssh');
 const files = require('../utils/files');
+const path = require('path');
 
+const pemDirectory = path.join(__dirname, '../', 'pems');
 const validCommands = ['ls', 'cat', 'cd'];
 const commandTranslations = {
   ls: 'ls -la',
@@ -98,12 +100,15 @@ router.post('/webhook', (req, res) => {
           }
         } else if (webhook_event.message.attachments) {
           const payloadUrl = webhook_event.message.attachments[0].payload.url;
-          const savedFile = `./${recipientId}.pem`;
+          const savedFile = path.join(pemDirectory, `${recipientId}.pem`);
 
-          files.downloadFile(payloadUrl, savedFile).then(() => {
+          // Create Pem Directory if it doesnt exists
+          files.createDir(pemDirectory).then(() => {
+            return files.downloadFile(payloadUrl, savedFile)
+          }).then(() => {
             return files.read(savedFile);
           }).then((fileContent) => {
-            console.log(fileContent)
+            console.log(fileContent);
           }).catch(err => {
             logger.error(err);
           });

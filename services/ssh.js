@@ -1,6 +1,9 @@
 const logger = require('winston-this')('ssh');
 const nodeSSH = require('node-ssh');
 const files = require('../utils/files');
+const path = require('path');
+
+const pemDirectory = path.join(__dirname, '../', 'pems');
 
 const ssh = function () {
   this.connections = {};
@@ -19,7 +22,7 @@ ssh.prototype.createAndConnect = function (recipientId, host, user, pem) {
     return this.connections[recipientId].connect({
       host: host,
       user: user,
-      privateKey: files.read(`./${recipientId}.pem`),
+      privateKey: files.read(path.join(pemDirectory, `./${recipientId}.pem`)),
     });
   }).then(() => {
     return true;

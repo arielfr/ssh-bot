@@ -21,4 +21,17 @@ module.exports = {
       }
     });
   },
+  createDir: (dirPath) => {
+    return Promise.resolve().then(() => {
+      try {
+        if (!fs.existsSync(dirPath)){
+          fs.mkdirSync(dirPath);
+        }
+
+        return true;
+      } catch (err) {
+        return Promise.reject(`An error ocurr creating directory: ${err}`);
+      }
+    });
+  }
 };
