@@ -2,6 +2,7 @@ const config = require('config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('winston-this')('index');
+const port = process.env.PORT || config.get('port');
 
 // Express Application initialization
 const app = express();
@@ -17,6 +18,6 @@ app.get('/ping', (req, res) => {
 
 app.use(require('./routes/webhook'));
 
-app.listen(config.get('port'), function () {
-  logger.info(`Application up and running on port ${config.get('port')}`);
+app.listen(port, function () {
+  logger.info(`Application up and running on port ${port}`);
 });
