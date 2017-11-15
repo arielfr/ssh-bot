@@ -11,7 +11,7 @@ const path = require('path');
 const pemDirectory = path.join(__dirname, '../', 'pems');
 const validCommands = ['ls', 'cat', 'cd'];
 const commandTranslations = {
-  ls: 'ls',
+  ls: 'ls -la',
   cat: 'cat',
   cd: 'cd',
 };
@@ -82,7 +82,15 @@ router.post('/webhook', (req, res) => {
               const internalCommand = commandTranslations[args._[0]];
 
               ssh.executeCommand(senderId, internalCommand).then((result) => {
-                facebook.sendMessage(senderId, result);
+                let commandResult = result;
+
+                if (result.length >= 640) {
+                  facebook.sendMessage(senderId, `The result was more than 640 characters. We are stripping the message.`);
+
+                  commandResult = result.substring(0, 640);
+                }
+
+                facebook.sendMessage(senderId, commandResult);
               }).catch((err) => {
                 console.log(err);
               });
@@ -93,7 +101,7 @@ router.post('/webhook', (req, res) => {
 
           if (command === 'disconnect') {
             ssh.disconnect(senderId).then(() => {
-              console.log('You are now disconnected');
+              facebook.sendMessage(senderId, `You are now disconnected. Hope to see you again.`);
             }).catch((err) => {
               console.log(err);
             });
