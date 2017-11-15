@@ -7,8 +7,11 @@ const facebook = require('../services/facebook');
 const ssh = require('../services/ssh');
 const files = require('../utils/files');
 const path = require('path');
+const text2png = require('text2png');
+const fs = require('fs');
 
 const pemDirectory = path.join(__dirname, '../', 'pems');
+const tempDirectory = path.join(__dirname, '../', 'temp');
 
 router.get('/webhook', (req, res) => {
   // Your verify token. Should be a random string.
@@ -122,15 +125,18 @@ router.post('/webhook', (req, res) => {
               ssh.executeCommand(senderId, terminalCommand).then((result) => {
                 let commandResult = result;
 
-                if (result.length >= 640) {
-                  facebook.sendMessage(senderId, `The result was more than 640 characters. We are stripping the message.`);
+                fs.writeFileSync(path.join(tempDirectory, `${senderId}.png`), text2png(commandResult, {textColor: 'white', bgColor: 'black', font: '12 Monaco'}));
 
-                  commandResult = result.substring(0, 640);
-                } else if (result.length === 0) {
+                facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`)).then((attachmentId) => {
+                  console.log(attachmentId)
+                  facebook.sendAttachment(senderId, attachmentId);
+                });
+
+                if (result.length === 0) {
                   commandResult = `Sorry, but the command don't produce any output...`;
                 }
 
-                facebook.sendMessage(senderId, commandResult);
+                // facebook.sendMessage(senderId, commandResult);
               }).catch((err) => {
                 facebook.sendMessage(senderId, `${err}`);
               });

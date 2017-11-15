@@ -26,6 +26,8 @@
     "fb": "^2.0.0",
     "minimist": "^1.2.0",
     "node-ssh": "^5.0.0",
+    "request": "^2.83.0",
+    "text2png": "^1.0.1",
     "winston-this": "^1.0.3"
   }
 }

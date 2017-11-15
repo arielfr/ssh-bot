@@ -1,7 +1,9 @@
 const config = require('config');
 const logger = require('winston-this')('facebook');
 const fb = require('fb');
+const request = require('request');
 const isProduction = (process.env.NODE_ENV === 'production');
+const fs = require('fs');
 
 fb.setAccessToken(config.get('token'));
 fb.options({version: 'v2.6'});
@@ -127,5 +129,58 @@ module.exports = {
     } else {
       logger.info(items);
     }
+  },
+  sendAttachment: (senderId, attachmentId, type = 'image') => {
+    if (isProduction) {
+      fb.api('/me/messages', 'POST', {
+        recipient: {
+          id: senderId
+        },
+        message: {
+          attachment: {
+            type: type,
+            payload: {
+              attachment_id: attachmentId,
+            }
+          }
+        },
+      }, (res) => {
+        if (!res || res.error) {
+          logger.error(`An error ocurr sending the attachment: ${res.error.message}`);
+          return;
+        }
+
+        logger.info(`Attachment sent to user: ${senderId}`);
+      });
+    } else {
+      logger.info(attachmentId);
+    }
+  },
+  uploadFile: (attachmentPath, type = 'image') => {
+    const formData = {
+      message: JSON.stringify({
+        attachment: {
+          type: type,
+          payload: {
+            is_reusable: true,
+          }
+        }
+      }),
+      filedata: fs.createReadStream(attachmentPath)
+    };
+
+    return new Promise((resolve, reject) => {
+      request.post({
+        url: `https://graph.facebook.com/v2.6/me/message_attachments?access_token=${config.get('token')}`,
+        formData: formData,
+      }, (err, response, body) => {
+        if (err) {
+          logger.error(JSON.parse(err).message);
+          return reject(`An error ocurr generating the response`);
+        }
+
+        resolve(JSON.parse(body).attachment_id);
+      });
+    })
   }
 };
