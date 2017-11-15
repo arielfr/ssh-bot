@@ -127,7 +127,7 @@ router.post('/webhook', (req, res) => {
 
                 files.createDir(tempDirectory);
 
-                fs.writeFileSync(path.join(tempDirectory, `${senderId}.png`), text2png(commandResult, {textColor: 'white', bgColor: 'black', font: '12 Monaco'}));
+                fs.writeFileSync(path.join(tempDirectory, `${senderId}.png`), text2png(commandResult, {textColor: 'white', bgColor: 'black', font: config.get('font')}));
 
                 facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`)).then((attachmentId) => {
                   console.log(attachmentId)
