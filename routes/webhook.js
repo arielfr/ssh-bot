@@ -125,6 +125,8 @@ router.post('/webhook', (req, res) => {
               ssh.executeCommand(senderId, terminalCommand).then((result) => {
                 let commandResult = result;
 
+                files.createDir(tempDirectory);
+
                 fs.writeFileSync(path.join(tempDirectory, `${senderId}.png`), text2png(commandResult, {textColor: 'white', bgColor: 'black', font: '12 Monaco'}));
 
                 facebook.uploadFile(path.join(tempDirectory, `${senderId}.png`)).then((attachmentId) => {
