@@ -16,11 +16,12 @@ module.exports = {
       recipient: {
         id: recipientId
       },
-      message: message,
+      message: {
+        text: message
+      },
     }, (res) => {
-      console.log(JSON.stringify(res))
       if (!res || res.error) {
-        logger.error(`An error ocurr on sendMessage: ${res.error}`);
+        logger.error(`An error ocurr on sendMessage: ${res.error.message}`);
       }
 
       logger.info(`Message sent to user: ${recipientId}`);

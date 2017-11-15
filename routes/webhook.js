@@ -82,7 +82,7 @@ router.post('/webhook', (req, res) => {
               const internalCommand = commandTranslations[args._[0]];
 
               ssh.executeCommand(recipientId, internalCommand).then((result) => {
-                console.log(result);
+                facebook.sendMessage(recipientId, result);
               }).catch((err) => {
                 console.log(err);
               });
