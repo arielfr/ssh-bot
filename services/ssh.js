@@ -145,9 +145,10 @@ ssh.prototype.reconnect = function (senderId) {
  * Execute command
  * @param senderId
  * @param command
+ * @param interactive
  * @returns {*}
  */
-ssh.prototype.executeCommand = function (senderId, command) {
+ssh.prototype.executeCommand = function (senderId, command, interactive = false) {
   if (!this.connections[senderId]) {
     return Promise.reject('You dont have a open connection. Please connect first. Send "help" command to know the available commands');
   }
@@ -155,7 +156,7 @@ ssh.prototype.executeCommand = function (senderId, command) {
   return Promise.resolve().then(() => {
     logger.info(`Executing command: ${senderId} -> ${command}`);
 
-    return this.connections[senderId].execCommand(command);
+    return this.connections[senderId].execCommand((interactive) ? `set -i && source ~/.bashrc && ${command}` : command);
   }).then((result) => {
     if (result.stderr) {
       return Promise.reject(result.stderr);

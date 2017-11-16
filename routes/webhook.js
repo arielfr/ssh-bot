@@ -81,6 +81,10 @@ router.post('/webhook', (req, res) => {
                   subtitle: 'cmd <COMMAND> --image. Example: cmd ls -la --image',
                 },
                 {
+                  title: 'cmd (interactive)',
+                  subtitle: 'cmd <COMMAND> --interactive. Example: cmd node --version --interactive',
+                },
+                {
                   title: 'reconnect',
                   subtitle: 'If you already connect using SSH, you can run this without any argument',
                 },
@@ -93,6 +97,8 @@ router.post('/webhook', (req, res) => {
                   subtitle: 'Get the available comments',
                 }
               ]);
+
+              facebook.sendMessage(senderId, `Important: On Ubuntu servers when running .bashrc if your SSH is not interactive there maybe commands that are not exported like: node, npm, etc... To avoid this, you can run your commands with "--interactive", or add manually "cmd set -i && source ~/.bashrc && <YOUR_COMMAND>"`);
             }
 
             // SSH Command
@@ -131,7 +137,11 @@ router.post('/webhook', (req, res) => {
                 terminalCommand = terminalCommand.replace('--image', '');
               }
 
-              ssh.executeCommand(senderId, terminalCommand).then((result) => {
+              if (args.interactive) {
+                terminalCommand = terminalCommand.replace('--interactive', '');
+              }
+
+              ssh.executeCommand(senderId, terminalCommand, args.interactive).then((result) => {
                 if (result.length === 0) {
                   logger.debug(`Response from command ${terminalCommand} was EMPTY`);
 
