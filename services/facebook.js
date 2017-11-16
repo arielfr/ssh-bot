@@ -32,25 +32,30 @@ module.exports = {
    * @param message
    */
   sendMessage: (senderId, message) => {
-    if (isProduction) {
-      fb.api('/me/messages', 'POST', {
-        recipient: {
-          id: senderId
-        },
-        message: {
-          text: message
-        },
-      }, (res) => {
-        if (!res || res.error) {
-          logger.error(`An error ocurr on sendMessage: ${res.error.message}`);
-          return;
-        }
+    return new Promise((resolve, reject) => {
+      if (isProduction) {
+        fb.api('/me/messages', 'POST', {
+          recipient: {
+            id: senderId
+          },
+          message: {
+            text: message
+          },
+        }, (res) => {
+          if (!res || res.error) {
+            logger.error(`An error ocurr on sendMessage: ${res.error.message}`);
+            reject(res.error);
+            return;
+          }
 
-        logger.info(`Message sent to user: ${senderId}`);
-      });
-    } else {
-      logger.info(message);
-    }
+          logger.info(`Message sent to user: ${senderId}`);
+          resolve(true);
+        });
+      } else {
+        logger.info(message);
+        resolve(true);
+      }
+    });
   },
   /**
    * Send action to Facebook

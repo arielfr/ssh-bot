@@ -161,25 +161,28 @@ router.post('/webhook', (req, res) => {
                     });
                   } else {
                     if (result.length > 640) {
+                      const toExecute = [];
                       // If the result is more than 3 messages, stripped
                       let strippedResult = (result.length > (640 * 2)) ? result.substring(0, (640 * 2)) : result;
 
                       let j = 0;
                       for (let i = 0; i < strippedResult.length; i++) {
                         if (i !== 0 && (i % 640) === 0) {
-                          facebook.sendMessage(senderId, strippedResult.substring(i - 640, j + 640));
+                          toExecute.push(facebook.sendMessage(senderId, strippedResult.substring(i - 640, j + 640)));
                           j = j + 640;
                         } else if ((i === (strippedResult.length - 1))) {
-                          facebook.sendMessage(senderId, strippedResult.substring((strippedResult.length - (i - j)), strippedResult.length));
+                          toExecute.push(facebook.sendMessage(senderId, strippedResult.substring((strippedResult.length - (i - j)), strippedResult.length)));
                         }
                       }
 
                       if (result.length > (640 * 2)) {
-                        facebook.sendMessage(senderId, `This message was bigger than 2 messages (1280 characters). Use --image instead`);
+                        toExecute.push(facebook.sendMessage(senderId, `This message was bigger than 2 messages (1280 characters). Use --image instead`));
                       }
+
+                      // Sending all messages
+                      Promise.all(toExecute);
                     } else {
-                      facebook.sendMessage(senderId, result
-                      );
+                        facebook.sendMessage(senderId, result);
                     }
                   }
                 }
