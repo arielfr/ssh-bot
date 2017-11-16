@@ -105,6 +105,7 @@ router.post('/webhook', (req, res) => {
                 facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${args.host}: ${err}`);
               });
             } else if (command === 'ssh') {
+              console.log(args)
               facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
             }
 
@@ -166,7 +167,7 @@ router.post('/webhook', (req, res) => {
                           facebook.sendMessage(senderId, result.substring(i - 640, j + 640));
                           j = j + 640;
                         } else if ((i === (result.length - 1))) {
-                          facebook.sendMessage(senderId, result.substring(i - 640, result.length));
+                          facebook.sendMessage(senderId, result.substring((result.length - (i - j)), result.length));
                         }
                       }
                     }
@@ -224,6 +225,6 @@ router.post('/webhook', (req, res) => {
  * Get arguments from an array of strings
  * @param arguments
  */
-const getArgs = (arguments = []) => parseArgs(arguments);
+const getArgs = (arguments = []) => parseArgs(arguments, {'—': true});
 
 module.exports = router;
