@@ -14,12 +14,13 @@ const ssh = function () {
  * Create a connection and connect
  * @param senderId
  * @param host
+ * @param port
  * @param username
  * @param password
  * @param pem
  * @returns {*}
  */
-ssh.prototype.createAndConnect = function (senderId, host, username, password, pem) {
+ssh.prototype.createAndConnect = function (senderId, host, port = 22, username, password, pem) {
   if (!!this.connections[senderId]) {
     return Promise.reject('You already have a open session. Please send "disconnect" first');
   }
@@ -28,7 +29,7 @@ ssh.prototype.createAndConnect = function (senderId, host, username, password, p
   this.connections[senderId] = new nodeSSH();
 
   return Promise.resolve().then(() => {
-    return (pem) ? this.secureConnection(senderId, host, username) : this.passwordConnection(senderId, host, username, password);
+    return (pem) ? this.secureConnection(senderId, host, port, username) : this.passwordConnection(senderId, host, port, username, password);
   }).catch(err => {
     // If an error ocurr, delete the connection
     delete this.connections[senderId];
@@ -40,10 +41,11 @@ ssh.prototype.createAndConnect = function (senderId, host, username, password, p
  * Connect to SSH with a PEM file
  * @param senderId
  * @param host
+ * @param port
  * @param username
  * @returns {Promise.<TResult>}
  */
-ssh.prototype.secureConnection = function (senderId, host, username) {
+ssh.prototype.secureConnection = function (senderId, host, port, username) {
   // Construct pemLocation
   const pemLocation = path.join(pemDirectory, `./${senderId}.pem`);
 
@@ -60,6 +62,7 @@ ssh.prototype.secureConnection = function (senderId, host, username) {
 
     return this.connections[senderId].connect({
       host: host,
+      port: port,
       username: username,
       privateKey: pemFile,
     });
@@ -67,6 +70,7 @@ ssh.prototype.secureConnection = function (senderId, host, username) {
     // Save the connection
     this.connectionsData[senderId] = {
       host: host,
+      port: port,
       username: username,
       pem: true,
     };
@@ -83,16 +87,18 @@ ssh.prototype.secureConnection = function (senderId, host, username) {
  * Create to SSH using a password
  * @param senderId
  * @param host
+ * @param port
  * @param username
  * @param password
  * @returns {Promise.<TResult>}
  */
-ssh.prototype.passwordConnection = function (senderId, host, username, password) {
+ssh.prototype.passwordConnection = function (senderId, host, port, username, password) {
   return Promise.resolve().then(() => {
     logger.info(`Creating a password connection: ${username}@${host}`);
 
     return this.connections[senderId].connect({
       host: host,
+      port: port,
       username: username,
       password: password,
     });
@@ -100,6 +106,7 @@ ssh.prototype.passwordConnection = function (senderId, host, username, password)
     // Save the connection
     this.connectionsData[senderId] = {
       host: host,
+      port: port,
       username: username,
       password: password,
       pem: false,
@@ -123,7 +130,7 @@ ssh.prototype.reconnect = function (senderId) {
     const savedConnection = this.connectionsData[senderId];
 
     if (Object.keys(savedConnection).length > 0) {
-      return this.createAndConnect(senderId, savedConnection.host, savedConnection.username, savedConnection.password, savedConnection.pem).then(() => {
+      return this.createAndConnect(senderId, savedConnection.host, savedConnection.port, savedConnection.username, savedConnection.password, savedConnection.pem).then(() => {
         return savedConnection;
       }).catch((err) => {
         return Promise.reject(err);

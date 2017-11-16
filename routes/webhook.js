@@ -66,11 +66,11 @@ router.post('/webhook', (req, res) => {
               facebook.sendGeneric(senderId, [
                 {
                   title: 'ssh (With PEM)',
-                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --pem',
+                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --port=<VALUE> (optional) --pem',
                 },
                 {
                   title: 'ssh (With Password)',
-                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --password=<VALUE>',
+                  subtitle: 'ssh --host=<VALUE> --user=<VALUE> --password=<VALUE> --port=<VALUE> (optional)',
                 },
                 {
                   title: 'cmd (response as text)',
@@ -99,13 +99,12 @@ router.post('/webhook', (req, res) => {
             if (command === 'ssh' && args.host && args.user && (args.pem || args.password)) {
               facebook.sendAction(senderId, facebook.available_actions.TYPING);
 
-              ssh.createAndConnect(senderId, args.host, args.user, args.password, args.pem).then(() => {
+              ssh.createAndConnect(senderId, args.host, args.port, args.user, args.password, args.pem).then(() => {
                 facebook.sendMessage(senderId, `You are now connected to ${args.host}@${args.user}`);
               }).catch((err) => {
                 facebook.sendMessage(senderId, `Oops and error ocurr connecting to ${args.host}: ${err}`);
               });
             } else if (command === 'ssh') {
-              console.log(args)
               facebook.sendMessage(senderId, `To connect you need to send us the "host", "user" and "pem" or "password" depending on your security`);
             }
 
