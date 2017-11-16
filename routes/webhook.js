@@ -61,7 +61,7 @@ router.post('/webhook', (req, res) => {
 
           if (['ssh', 'cmd', 'reconnect', 'disconnect', 'help'].indexOf(command) !== -1) {
             if (command === 'help') {
-              facebook.sendMessage(senderId, `Welcome to SSH!\n\nThis BOT will allow you to establish a SSH connection. We are currently supporting a PEM file and a password connection.\n\nIf you want to use a PEM file, you only need to send us the file as an attachment first. Then, use the ssh command "--pem" flag to indicate that you wanna use it\n\nAvailable Commands:`);
+              facebook.sendMessage(senderId, `Welcome to SSH!\n\nThis BOT will allow you to establish a SSH connection. We are currently supporting a PEM file and a password connection.\n\nIf you want to use a PEM file, you only need to send us the file as an attachment first. Then, use the ssh command "--pem" flag to indicate that you wanna use it\n\nOn Ubuntu servers when running .bashrc if your SSH is not interactive there maybe commands that are not exported. Run your commands with "--interactive"\n\nAvailable Commands:`);
 
               facebook.sendGeneric(senderId, [
                 {
@@ -97,8 +97,6 @@ router.post('/webhook', (req, res) => {
                   subtitle: 'Get the available comments',
                 }
               ]);
-
-              facebook.sendMessage(senderId, `Important: On Ubuntu servers when running .bashrc if your SSH is not interactive there maybe commands that are not exported like: node, npm, etc... To avoid this, you can run your commands with "--interactive", or add manually "cmd set -i && source ~/.bashrc && <YOUR_COMMAND>"`);
             }
 
             // SSH Command
