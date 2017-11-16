@@ -240,6 +240,11 @@ router.post('/webhook', (req, res) => {
  */
 const getArgs = (arguments = []) => parseArgs(arguments);
 
+/**
+ * Resolve promises in serial mode
+ * @param tasks
+ * @returns {*}
+ */
 const promiseSerial = (tasks) => {
   return tasks.reduce((promiseChain, currentTask) => {
     return promiseChain.then(chainResults =>
@@ -248,6 +253,6 @@ const promiseSerial = (tasks) => {
       )
     );
   }, Promise.resolve([]));
-}
+};
 
 module.exports = router;

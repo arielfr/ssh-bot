@@ -2,6 +2,12 @@ const fs = require('fs');
 const download = require('download');
 
 module.exports = {
+  /**
+   * Download file from url
+   * @param url
+   * @param dest
+   * @returns {Promise.<TResult>}
+   */
   downloadFile: (url, dest) => {
     return Promise.resolve().then(() => {
       return download(url).then(data => {
@@ -12,6 +18,11 @@ module.exports = {
       });
     });
   },
+  /**
+   * Read file synchronous
+   * @param location
+   * @returns {Promise.<TResult>}
+   */
   read: (location) => {
     return Promise.resolve().then(() => {
       try {
@@ -21,6 +32,11 @@ module.exports = {
       }
     });
   },
+  /**
+   * Create dir synchronous
+   * @param dirPath
+   * @returns {Promise.<TResult>}
+   */
   createDir: (dirPath) => {
     return Promise.resolve().then(() => {
       try {
@@ -34,12 +50,27 @@ module.exports = {
       }
     });
   },
+  /**
+   * Check if file exists
+   * @param filePath
+   * @returns {Promise.<TResult>}
+   */
   fileExists: (filePath) => {
     return Promise.resolve().then(() => {
       return fs.existsSync(filePath);
     });
   },
+  /**
+   * Create a createReadStream
+   * @param filePath
+   */
   createReadStream: filePath => fs.createReadStream(filePath),
+  /**
+   * Write file synchronous
+   * @param filePath
+   * @param content
+   * @returns {*}
+   */
   writeFile: (filePath, content) => {
     return fs.writeFileSync(filePath, content);
   },
