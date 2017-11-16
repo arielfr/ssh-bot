@@ -170,6 +170,9 @@ router.post('/webhook', (req, res) => {
                           facebook.sendMessage(senderId, result.substring((result.length - (i - j)), result.length));
                         }
                       }
+                    } else {
+                      facebook.sendMessage(senderId, result
+                      );
                     }
                   }
                 }
