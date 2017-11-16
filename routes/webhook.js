@@ -180,7 +180,7 @@ router.post('/webhook', (req, res) => {
                       }
 
                       // Sending all messages
-                      Promise.all(toExecute);
+                      promiseSerial(toExecute);
                     } else {
                         facebook.sendMessage(senderId, result);
                     }
@@ -239,5 +239,15 @@ router.post('/webhook', (req, res) => {
  * @param arguments
  */
 const getArgs = (arguments = []) => parseArgs(arguments);
+
+const promiseSerial = (tasks) => {
+  return tasks.reduce((promiseChain, currentTask) => {
+    return promiseChain.then(chainResults =>
+      currentTask.then(currentResult =>
+        [ ...chainResults, currentResult ]
+      )
+    );
+  }, Promise.resolve([]));
+}
 
 module.exports = router;
