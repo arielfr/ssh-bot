@@ -166,6 +166,20 @@ npm install
 
 Done! Easy...
 
+#### Start (Production)
+
+```bash
+npm start
+```
+
+#### Start (Development)
+
+If you start the application this way, you are not going to be posting messages on Facebook
+
+```bash
+npm start-dev
+```
+
 ## Deployment
 
 This application is currently deployed on a Heroku. It has the `buildpacks` already configured.
