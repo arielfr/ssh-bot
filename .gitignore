@@ -2,7 +2,7 @@ mocks/**
 # Logs
 *.log
 
-pem/
+pems/
 temp/
 
 package-lock.json
