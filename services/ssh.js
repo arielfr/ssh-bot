@@ -156,10 +156,6 @@ ssh.prototype.executeCommand = function (senderId, command) {
 
     return result.stdout;
   }).catch(err => {
-    console.log(err);
-    console.log(err.message)
-    console.log(err.prototype)
-
     return Promise.reject(err);
   });
 };

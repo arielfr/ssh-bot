@@ -187,7 +187,11 @@ router.post('/webhook', (req, res) => {
                   }
                 }
               }).catch((err) => {
-                facebook.sendMessage(senderId, `${err}`);
+                if (err.message === 'No response from server') {
+                  facebook.sendMessage(senderId, `The connection die. Please type "reconnect" to connect again or "help" to learn about the available commands`);
+                } else {
+                  facebook.sendMessage(senderId, `${err}`);
+                }
               });
             }
 

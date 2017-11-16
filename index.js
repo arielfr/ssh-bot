@@ -29,6 +29,8 @@ app.get('/ping', (req, res) => {
   });
 });
 
+app.use(require('./routes/webhook'));
+
 app.use(function (err, req, res, next) {
   res.send('Oops, an error ocurred...');
 });
@@ -36,8 +38,6 @@ app.use(function (err, req, res, next) {
 app.use((req, res) => {
   res.redirect('/');
 });
-
-app.use(require('./routes/webhook'));
 
 app.listen(port, function () {
   logger.info(`Application up and running on port ${port}`);
