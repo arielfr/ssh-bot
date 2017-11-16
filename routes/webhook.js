@@ -52,7 +52,7 @@ router.post('/webhook', (req, res) => {
       if (webhook_event.message) {
         // If it is a text message
         if (webhook_event.message.text) {
-          const text = webhook_event.message.text || '';
+          const text = webhook_event.message.text.replace(/—/g, '--') || '';
           const splitText = text.split(' ');
           const command = splitText[0].toLowerCase();
           const args = getArgs(splitText.slice(1));
@@ -225,6 +225,6 @@ router.post('/webhook', (req, res) => {
  * Get arguments from an array of strings
  * @param arguments
  */
-const getArgs = (arguments = []) => parseArgs(arguments, {'—': true});
+const getArgs = (arguments = []) => parseArgs(arguments);
 
 module.exports = router;
