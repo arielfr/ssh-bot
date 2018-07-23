@@ -1,0 +1,7 @@
+{
+  "name": "ssh-bot",
+  "alias": "ssh-bot",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

@@ -190,17 +190,17 @@ npm start-dev
 
 ## Deployment
 
-This application is currently deployed on a Heroku. It has the `buildpacks` already configured.
+This application is currently deployed on a Now. It has the `now.json` already configured.
 
 If you want to deploy it, you just need to execute:
 
 ```bash
-heroku create <NAME>
+now --docker --public
 ```
 
 You can find it currently here:
 
-[https://fb-ssh-bot.herokuapp.com/](https://fb-ssh-bot.herokuapp.com/)
+[https://ssh-bot.now.sh/](https://ssh-bot.now.sh/)
 
 ## License
 
